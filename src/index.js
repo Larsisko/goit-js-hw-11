@@ -2,7 +2,12 @@ import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import { searchImages } from './api';
-
+let notificationsShown = {
+  noImagesFound: false,
+  totalImages: false,
+  error: false,
+  totalResults: false,
+};
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreButton = document.querySelector('.load-more');
@@ -12,6 +17,7 @@ let currentPage = 1;
 let currentQuery = '';
 
 document.addEventListener('DOMContentLoaded', function () {
+  console.log(notificationsShown);
   searchForm.addEventListener('submit', async e => {
     e.preventDefault();
     const searchQuery = e.target.searchQuery.value.trim();
@@ -25,21 +31,18 @@ document.addEventListener('DOMContentLoaded', function () {
       currentPage = 1;
       gallery.innerHTML = '';
       currentQuery = searchQuery;
+      notificationsShown.noImagesFound = false;
+      notificationsShown.totalImages = false;
       searchAndDisplayImages(searchQuery, currentPage);
     }
   });
 
   loadMoreButton.addEventListener('click', () => {
-    currentPage++;
-    searchAndDisplayImages(currentQuery, currentPage);
+    if (currentQuery) {
+      currentPage++;
+      searchAndDisplayImages(currentQuery, currentPage);
+    }
   });
-
-  let notificationsShown = {
-    noImagesFound: false,
-    totalImages: false,
-    error: false,
-    totalResults: false,
-  };
 
   async function searchAndDisplayImages(query, currentPage) {
     try {
@@ -52,7 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
           'Sorry, there are no images matching your search query. Please try again.'
         );
         notificationsShown.noImagesFound = true;
-        return;
+      } else {
+        notificationsShown.noImagesFound = false;
       }
 
       if (totalHits > 0 && !notificationsShown.totalImages) {
@@ -61,8 +65,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       displayImages(hits);
-
-      if (currentPage * perPage < totalHits) {
+      const maxPages = 10;
+      if (currentPage * perPage < totalHits && currentPage < maxPages) {
         loadMoreButton.style.display = 'block';
       } else {
         loadMoreButton.style.display = 'none';
@@ -83,19 +87,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   let isScrolling = false;
-
+  window.addEventListener('scroll', handleScroll);
   function handleScroll() {
+    console.log('Scrolling...');
     if (!isScrolling) {
       isScrolling = true;
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
         currentPage++;
-        searchAndDisplayImages(currentQuery, currentPage);
+
+        // searchAndDisplayImages(currentQuery, currentPage);
       }
 
       isScrolling = false;
     }
   }
-  window.addEventListener('scroll', handleScroll);
 
   function displayImages(images) {
     images.forEach(image => {
@@ -137,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
       photoCard.appendChild(info);
 
       gallery.appendChild(photoCard);
+      gallery.appendChild(loadMoreButton);
       lightbox.refresh();
     });
   }

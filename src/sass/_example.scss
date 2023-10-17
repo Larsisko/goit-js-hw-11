@@ -56,23 +56,24 @@
 }
 
 .load-more {
-  z-index: 50;
   position: absolute;
-  top: 85%;
-  left: 80%;
+  top: 99%;
+  left: 90%;
+  z-index: 999;
   padding: 20px 20px;
   background-color: pink;
-  border-radius: 12px;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-.invisible {
+
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
   display: none;
+  margin: 0 auto;
 }
-.load-more .visible {
-  opacity: 1;
-  transition: opacity 0.3s ease-in-out;
-}
+
 img {
   width: 400px;
   height: 300px;
